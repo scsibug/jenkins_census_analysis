@@ -1,0 +1,16 @@
+Name:           censusParse
+Version:        0.1
+License:        BSD3
+License-file:   LICENSE
+Cabal-Version: >= 1.6
+Copyright: 
+  Copyright (c) 2011, Greg Heartsfield
+Author:         Greg Heartsfield <scsibug@imap.cc>
+Maintainer:     Greg Heartsfield <scsibug@imap.cc>
+Stability:      Alpha
+build-type:     Simple
+Synopsis:       Parse Jenkins census data into CSV
+
+Executable     censusParse
+  Build-depends:  base >= 3 && < 5, aeson == 0.3.2.5, bytestring >= 0.9, containers > 0.3 && < 0.4, attoparsec > 0.8.4 && < 0.9, vector >= 0.7 && < 0.8
+  main-is:        censusParse.hs
