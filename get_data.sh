@@ -12,6 +12,6 @@ echo "Expanding compressed census data..."
 for gz in *gz; do gzip -d $gz; done
 if [ $? -ne 0 ]; then
   echo "Error expanding census gzip files."
-else;
+else
   echo "Complete"
 fi
