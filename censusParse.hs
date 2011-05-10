@@ -45,7 +45,6 @@ sampleToRecord sample = Record { install = (fromMaybe "unknown" (getInstall samp
                                  masterJvmVendor = (fromMaybe "Nothing" (getMasterJvmVendor sample)) }
 
 recordToCSV :: Record -> String
---recordToCSV r = (install r) ++ "," ++ (timestamp r) ++ "," ++ (masterJvmVersion r) ++ "," ++ (masterJvmVendor r)
 recordToCSV r = intercalate "," [(install r),(timestamp r),(version r),(masterJvmVersion r),(masterJvmVendor r)]
 
 getTimestamp :: Value -> Maybe String
