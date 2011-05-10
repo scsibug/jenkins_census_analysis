@@ -3,36 +3,60 @@ import Data.Aeson.Parser
 import Data.Attoparsec as A (Result(..), parse)
 import qualified Data.ByteString as B
 import Data.Map as M (elems, keys, lookup)
+import Data.List (intercalate)
 import Data.Vector as V (toList, filter, (!?))
 import Data.Maybe (fromMaybe)
 import System.Environment
 
+-- Census data is defined here https://github.com/jenkinsci/jenkins/blob/master/core/src/main/java/hudson/model/UsageStatistics.java
+--   Structure of census data:
+-- stat
+--  always 1
+-- jobs
+--   {type:count}
+-- timestamp
+--   String
+-- version
+--   String
+-- install
+--   String (unique identifier)
+-- plugins
+-- nodes
+
 data Record = Record { install :: String,
                        timestamp :: String,
+                       version :: String,
                        masterJvmVersion :: String,
                        masterJvmVendor :: String
 } deriving (Read, Show)
-
--- Each sample (pair under the top level object) contains an array which contains 1 or more 
 
 main = do argv <- getArgs
           let filename : xs = argv
           f <- B.readFile filename
           let r = A.parse json f
           mapM putStrLn $ (map (recordToCSV . sampleToRecord) (samples (getDone r)))
---          print ("# of samples: "++(show (length (samples (getDone r)))))
 
 -- Take a sample, and produce a record for output and later analysis
 sampleToRecord :: Value -> Record
-sampleToRecord sample = Record { install = (fromMaybe "unknown" (getInstall sample)), timestamp = (fromMaybe "unknown" (getTimestamp sample)), masterJvmVersion = (fromMaybe "Nothing" (getMasterJvmVersion sample)), masterJvmVendor = (fromMaybe "Nothing" (getMasterJvmVendor sample))  }
+sampleToRecord sample = Record { install = (fromMaybe "unknown" (getInstall sample)),
+                                 timestamp = (fromMaybe "unknown" (getTimestamp sample)),
+                                 version = (fromMaybe "unknown" (getVersion sample)),
+                                 masterJvmVersion = (fromMaybe "Nothing" (getMasterJvmVersion sample)),
+                                 masterJvmVendor = (fromMaybe "Nothing" (getMasterJvmVendor sample)) }
 
 recordToCSV :: Record -> String
-recordToCSV r = (install r) ++ "," ++ (timestamp r) ++ "," ++ (masterJvmVersion r) ++ "," ++ (masterJvmVendor r)
+--recordToCSV r = (install r) ++ "," ++ (timestamp r) ++ "," ++ (masterJvmVersion r) ++ "," ++ (masterJvmVendor r)
+recordToCSV r = intercalate "," [(install r),(timestamp r),(version r),(masterJvmVersion r),(masterJvmVendor r)]
 
 getTimestamp :: Value -> Maybe String
 getTimestamp sample =
     case sample of
       Object m -> M.lookup (mkText "timestamp") m >>= (\x -> Just (mkRealString x))
+
+getVersion :: Value -> Maybe String
+getVersion sample =
+    case sample of
+      Object m -> M.lookup (mkText "version") m >>= (\x -> Just (mkRealString x))
 
 getInstall :: Value -> Maybe String
 getInstall sample =
